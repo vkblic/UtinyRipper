@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using uTinyRipper;
-using uTinyRipper.AssetExporters;
 using uTinyRipper.Classes;
 using uTinyRipper.Classes.Shaders;
-using uTinyRipper.Classes.Shaders.Exporters;
+using uTinyRipper.Converters;
+using uTinyRipper.Converters.Shaders;
+using uTinyRipper.Project;
 using uTinyRipper.SerializedFiles;
 
 using Object = uTinyRipper.Classes.Object;
@@ -68,9 +69,11 @@ namespace uTinyRipperGUI.Exporters
 			switch (graphicApi)
 			{
 				case GPUPlatform.d3d9:
+					return new ShaderDXExporter(graphicApi);
+
 				case GPUPlatform.d3d11_9x:
 				case GPUPlatform.d3d11:
-					return new ShaderDXExporter(version, graphicApi);
+					return new ShaderHLSLccExporter(graphicApi);
 
 				case GPUPlatform.vulkan:
 					return new ShaderVulkanExporter();

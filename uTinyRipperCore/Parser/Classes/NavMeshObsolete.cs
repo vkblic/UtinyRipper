@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
-using uTinyRipper.AssetExporters;
 using uTinyRipper.Classes.NavMeshDatas;
-using uTinyRipper.SerializedFiles;
+using uTinyRipper.Converters;
 using uTinyRipper.YAML;
+using uTinyRipper;
 
 namespace uTinyRipper.Classes
 {
@@ -21,23 +21,20 @@ namespace uTinyRipper.Classes
 		{
 			base.Read(reader);
 
-			m_meshData = reader.ReadByteArray();
-			m_heightmaps = reader.ReadAssetArray<HeightmapData>();
+			MeshData = reader.ReadByteArray();
+			Heightmaps = reader.ReadAssetArray<HeightmapData>();
 		}
 
-		public override IEnumerable<Object> FetchDependencies(ISerializedFile file, bool isLog = false)
+		public override IEnumerable<PPtr<Object>> FetchDependencies(DependencyContext context)
 		{
-			foreach (Object dependency in base.FetchDependencies(file, isLog))
+			foreach (PPtr<Object> asset in base.FetchDependencies(context))
 			{
-				yield return dependency;
+				yield return asset;
 			}
 
-			foreach (HeightmapData heightmap in Heightmaps)
+			foreach (PPtr<Object> asset in context.FetchDependencies(Heightmaps, HeightmapsName))
 			{
-				foreach (Object dependency in heightmap.FetchDependencies(file, isLog))
-				{
-					yield return dependency;
-				}
+				yield return asset;
 			}
 		}
 
@@ -51,13 +48,10 @@ namespace uTinyRipper.Classes
 
 		public override string ExportPath => Path.Combine(AssetsKeyword, OcclusionCullingSettings.SceneKeyword, ClassID.ToString());
 
-		public IReadOnlyList<byte> MeshData => m_meshData;
-		public IReadOnlyList<HeightmapData> Heightmaps => m_heightmaps;
+		public byte[] MeshData { get; set; }
+		public HeightmapData[] Heightmaps { get; set; }
 
 		public const string MeshDataName = "m_MeshData";
 		public const string HeightmapsName = "m_Heightmaps";
-
-		private byte[] m_meshData;
-		private HeightmapData[] m_heightmaps;
 	}
 }

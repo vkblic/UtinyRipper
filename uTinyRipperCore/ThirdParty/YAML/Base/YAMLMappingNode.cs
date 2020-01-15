@@ -14,6 +14,12 @@ namespace uTinyRipper.YAML
 			Style = style;
 		}
 
+		public void Add(int key, long value)
+		{
+			YAMLScalarNode valueNode = new YAMLScalarNode(value);
+			Add(key, valueNode);
+		}
+
 		public void Add(int key, string value)
 		{
 			YAMLScalarNode valueNode = new YAMLScalarNode(value);
@@ -186,7 +192,7 @@ namespace uTinyRipper.YAML
 			InsertEnd(key, value);
 		}
 
-		public void Concatenate(YAMLMappingNode map)
+		public void Append(YAMLMappingNode map)
 		{
 			foreach (KeyValuePair<YAMLNode, YAMLNode> child in map.m_children)
 			{
@@ -226,10 +232,14 @@ namespace uTinyRipper.YAML
 				YAMLNode key = kvp.Key;
 				YAMLNode value = kvp.Value;
 
+				bool iskey = emitter.IsKey;
+				emitter.IsKey = true;
 				key.Emit(emitter);
+				emitter.IsKey = false;
 				StartTransition(emitter, value);
 				value.Emit(emitter);
 				EndTransition(emitter, value);
+				emitter.IsKey = iskey;
 			}
 			EndChildren(emitter);
 		}
